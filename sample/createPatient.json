@@ -1,23 +1,24 @@
 {
     "METHOD": "POST",
-    "URL": "/api/v1/endpoint",
-    "HEADER": 
+    "URL": "/api/patients",
+    "HEADER": "Content-Type/Authorizations",
     "BODY": {
-  "last_name": "Doe",
-  "first_name": "John",
-  "gender": "Male",
-  "date_of_birth": "1985-05-15",
-  "mobile_number": "+1234567890",
-  "mobile_sms": true,
-  "alternative_number": "+9876543210",
-  "alternative_sms": false,
-  "region_district": "North District",
-  "city_village": "Springfield",
-  "highest_education_level": "Bachelor's Degree",
-  "employment_status": "Employed",
-  "school_name": "Springfield High",
-  "school_phone_number": "+1122334455"
-}
+      "last_name": "",
+      "first_name": "",
+      "gender": "",
+      "date_of_birth": "yyyy-mm-dd",
+      "age":2,
+      "mobile_number": "",
+      "mobile_sms": true,
+      "alternative_number": "",
+      "alternative_sms": false,
+      "region_district": "",
+      "city_village": "",
+      "highest_education_level": "",
+      "employment_status": "",
+      "school_name": "",
+      "school_phone_number": ""
+    }
 
 }
 
