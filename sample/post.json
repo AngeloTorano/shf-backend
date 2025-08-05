@@ -1,0 +1,52 @@
+
+{
+    "COMMENT":"FOR LOGIN",
+    "METHOD": "POST",
+    "URL": "/api/auth/login",
+    "BODY": {
+      "username": "",
+      "password": ""
+    },
+
+    "COMMENT":"FOR CREATE USERS",
+    "METHOD": "POST",
+    "URL": "/api/users",
+    "HEADER": "Content-Type && Authorization",
+    "BODY": 
+    {
+      "username": "",
+      "password": "",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "roles": [""]
+    },
+
+    "METHOD": "POST",
+    "URL": "/api/patients",
+    "HEADER": "Content-Type && Authorization",
+    "BODY": 
+    {
+      "last_name": "",
+      "first_name": "",
+      "gender": "",
+      "date_of_birth": "yyyy-mm-dd",
+      "age":2,
+      "mobile_number": "",
+      "mobile_sms": true,
+      "alternative_number": "",
+      "alternative_sms": false,
+      "region_district": "",
+      "city_village": "",
+      "highest_education_level": "",
+      "employment_status": "",
+      "school_name": "",
+      "school_phone_number": ""
+    }
+
+
+}
+
+
+
+
