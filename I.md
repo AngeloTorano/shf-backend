@@ -4,7 +4,7 @@ Once you install postgreSQL
 create database name: "healthcare_db"
 
 then update the .evn file DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/healthcare_db
-after creating db right click the db-name the select "Query tool"
+after creating db right click the db-name then select "Query tool"
 in VS Code copy the content of file in scripts folder file-name is init-database.sql
 then paste the content of init-database.sql file in the query tool and
 run the query tool to create the tables and sample data like user account use for login in the database.
