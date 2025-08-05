@@ -2,6 +2,9 @@
 First get the token
 
 -- you can get the token from the http://localhost:3000/api/auth/login
+header:
+Content-Type : application/json
+
 {
   "username": "admin2",
   "password": "adminPass123!"
