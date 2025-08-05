@@ -1,13 +1,24 @@
+# FOR CONFIGURING DATABASE
+Once you install postgreSQL
+
+create database name: "healthcare_db"
+
+then update the .evn file DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/healthcare_db
+after creating db right click the db-name the select "Query tool"
+in VS Code copy the content of file in scripts folder file-name is init-database.sql
+then paste the content of init-database.sql file in the query tool and
+run the query tool to create the tables and sample data like user account use for login in the database.
+
+
 # INSTRUCTIONS POSTMAN
 First get the token
 
 -- you can get the token from the http://localhost:3000/api/auth/login
 header:
 Content-Type : application/json
-
 {
-  "username": "admin2",
-  "password": "adminPass123!"
+  "username": "admin",
+  "password": "admin123!"
 }
 
 -- upon login the postman response display
@@ -17,15 +28,15 @@ NOTE: make use the you login once, becasuse once you relogin the 1st token will 
 {
     "success": true,
     "message": "Login successful",
-    "timestamp": "2025-08-05T15:55:32.401Z",
+    "timestamp": "2025-08-05T19:26:16.812Z",
     "data": {
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsInVzZXJuYW1lIjoiYWRtaW4yIiwicm9sZXMiOlsiYWRtaW4iXSwiaWF0IjoxNzU0NDA5MzMyLCJleHAiOjE3NTQ0OTU3MzJ9.UUq8nNw6HtgXNymPA4f3X2jI0jWIzVeAfS68WuCoMCU",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlcyI6WyJhZG1pbiJdLCJpYXQiOjE3NTQ0MjE5NzYsImV4cCI6MTc1NDUwODM3Nn0.JfznYDyfDpacQ8zMvone9ndJzKGVY8ZheKMopEdJSC8",
         "user": {
-            "user_id": 2,
-            "username": "admin2",
+            "user_id": 1,
+            "username": "admin",
             "first_name": "admin",
             "last_name": "admin",
-            "email": "admin1@example.com",
+            "email": "admin@example.com",
             "roles": [
                 "admin"
             ]

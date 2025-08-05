@@ -25,7 +25,7 @@ INSERT INTO roles (role_name) VALUES
 ('admin'),
 ('city_coordinator'),
 ('country_coordinator'),
-('supply_manager'),
+('supply_manager');
 
 -- users Table: Stores user authentication and basic information
 CREATE TABLE users (
@@ -40,12 +40,17 @@ CREATE TABLE users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+INSERT INTO users (username, password_hash, first_name, last_name, email)
+VALUES ('admin', '$2a$12$Gsxa7pi10GnZPC9Q/qWK0u8gPIBvcTajGRbptjENNDtayMIHuoSEq', 'admin', 'admin', 'admin@example.com');
+
 -- user_roles Table: Links users to their assigned roles
 CREATE TABLE user_roles (
     user_id INTEGER NOT NULL REFERENCES users(user_id),
     role_id INTEGER NOT NULL REFERENCES roles(role_id),
     PRIMARY KEY (user_id, role_id)
 );
+INSERT INTO user_roles (user_id, role_id)
+VALUES (1, 1);
 
 -- countries Table: Lookup table for countries
 CREATE TABLE countries (
