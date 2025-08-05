@@ -11,6 +11,7 @@ class Phase2Controller {
 
       const registrationData = req.body
       registrationData.completed_by_user_id = req.user.user_id
+      registrationData.phase_id = 2
 
       const columns = Object.keys(registrationData).join(", ")
       const placeholders = Object.keys(registrationData)
@@ -49,6 +50,97 @@ class Phase2Controller {
       client.release()
     }
   }
+  // Ear Screening
+  static async createEarScreening(req, res) {
+    const client = await db.getClient()
+
+    try {
+      await client.query("BEGIN")
+
+      const screeningData = req.body
+      screeningData.completed_by_user_id = req.user.user_id
+      screeningData.phase_id = 2
+
+      const columns = Object.keys(screeningData).join(", ")
+      const placeholders = Object.keys(screeningData)
+        .map((_, index) => `$${index + 1}`)
+        .join(", ")
+      const values = Object.values(screeningData)
+
+      const query = `
+        INSERT INTO ear_screening (${columns})
+        VALUES (${placeholders})
+        RETURNING *
+      `
+
+      const result = await client.query(query, values)
+
+      // Log creation
+      await client.query(
+        "INSERT INTO audit_logs (table_name, record_id, action_type, new_data, changed_by_user_id) VALUES ($1, $2, $3, $4, $5)",
+        ["ear_screening", result.rows[0].ear_screening_id, "CREATE", JSON.stringify(screeningData), req.user.user_id],
+      )
+
+      await client.query("COMMIT")
+
+      return ResponseHandler.success(res, result.rows[0], "Ear screening created successfully", 201)
+    } catch (error) {
+      await client.query("ROLLBACK")
+      console.error("Create ear screening error:", error)
+      return ResponseHandler.error(res, "Failed to create ear screening")
+    } finally {
+      client.release()
+    }
+  }
+
+  // Hearing Screening
+  static async createHearingScreening(req, res) {
+    const client = await db.getClient()
+
+    try {
+      await client.query("BEGIN")
+
+      const screeningData = req.body
+      screeningData.completed_by_user_id = req.user.user_id
+      screeningData.phase_id = 2
+
+      const columns = Object.keys(screeningData).join(", ")
+      const placeholders = Object.keys(screeningData)
+        .map((_, index) => `$${index + 1}`)
+        .join(", ")
+      const values = Object.values(screeningData)
+
+      const query = `
+        INSERT INTO hearing_screening (${columns})
+        VALUES (${placeholders})
+        RETURNING *
+      `
+
+      const result = await client.query(query, values)
+
+      // Log creation
+      await client.query(
+        "INSERT INTO audit_logs (table_name, record_id, action_type, new_data, changed_by_user_id) VALUES ($1, $2, $3, $4, $5)",
+        [
+          "hearing_screening",
+          result.rows[0].hearing_screen_id,
+          "CREATE",
+          JSON.stringify(screeningData),
+          req.user.user_id,
+        ],
+      )
+
+      await client.query("COMMIT")
+
+      return ResponseHandler.success(res, result.rows[0], "Hearing screening created successfully", 201)
+    } catch (error) {
+      await client.query("ROLLBACK")
+      console.error("Create hearing screening error:", error)
+      return ResponseHandler.error(res, "Failed to create hearing screening")
+    } finally {
+      client.release()
+    }
+  }
 
   // Fitting Table
   static async createFittingTable(req, res) {
@@ -59,6 +151,7 @@ class Phase2Controller {
 
       const fittingData = req.body
       fittingData.fitter_id = req.user.user_id
+      fittingData.phase_id = 2
 
       const columns = Object.keys(fittingData).join(", ")
       const placeholders = Object.keys(fittingData)
@@ -218,93 +311,9 @@ class Phase2Controller {
     }
   }
 
-  // Get complete Phase 2 data for a patient
-  static async getPhase2Data(req, res) {
-    try {
-      const { patientId } = req.params
 
-      const queries = {
-        registration: `
-          SELECT * FROM phase2_registration_section 
-          WHERE patient_id = $1 ORDER BY created_at DESC LIMIT 1
-        `,
-        fittingTable: `
-          SELECT * FROM fitting_table 
-          WHERE patient_id = $1 ORDER BY created_at DESC LIMIT 1
-        `,
-        fitting: `
-          SELECT * FROM fitting 
-          WHERE patient_id = $1 ORDER BY created_at DESC LIMIT 1
-        `,
-        counseling: `
-          SELECT * FROM counseling 
-          WHERE patient_id = $1 ORDER BY created_at DESC LIMIT 1
-        `,
-        finalQC: `
-          SELECT * FROM final_qc_p2 
-          WHERE patient_id = $1 ORDER BY created_at DESC LIMIT 1
-        `,
-        earScreening: `
-          SELECT * FROM ear_screening 
-          WHERE patient_id = $1 AND phase_id = 2 ORDER BY created_at DESC
-        `,
-        hearingScreening: `
-          SELECT * FROM hearing_screening 
-          WHERE patient_id = $1 AND phase_id = 2 ORDER BY created_at DESC LIMIT 1
-        `,
-      }
 
-      const results = {}
-
-      for (const [key, query] of Object.entries(queries)) {
-        const result = await db.query(query, [patientId])
-        results[key] = key === "earScreening" ? result.rows : result.rows[0] || null
-      }
-
-      return ResponseHandler.success(res, results, "Phase 2 data retrieved successfully")
-    } catch (error) {
-      console.error("Get Phase 2 data error:", error)
-      return ResponseHandler.error(res, "Failed to retrieve Phase 2 data")
-    }
-  }
-
-  // Get all fittings
-  static async getFittings(req, res) {
-    try {
-      const { patient_id, page = 1, limit = 10 } = req.query
-      const offset = (page - 1) * limit
-
-      let query = `
-        SELECT f.*, p.first_name, p.last_name, p.shf_id, u.username as fitter_name
-        FROM fitting f
-        LEFT JOIN patients p ON f.patient_id = p.patient_id
-        LEFT JOIN users u ON f.fitter_id = u.user_id
-      `
-
-      const conditions = []
-      const params = []
-
-      if (patient_id) {
-        conditions.push(`f.patient_id = $${params.length + 1}`)
-        params.push(patient_id)
-      }
-
-      if (conditions.length > 0) {
-        query += ` WHERE ${conditions.join(" AND ")}`
-      }
-
-      query += ` ORDER BY f.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`
-      params.push(limit, offset)
-
-      const result = await db.query(query, params)
-
-      return ResponseHandler.success(res, result.rows, "Fittings retrieved successfully")
-    } catch (error) {
-      console.error("Get fittings error:", error)
-      return ResponseHandler.error(res, "Failed to retrieve fittings")
-    }
-  }
-
+  // Get Methods
   static async getRegistrations(req, res) {
     try {
       const { patient_id, page = 1, limit = 10 } = req.query
@@ -341,6 +350,90 @@ class Phase2Controller {
     }
   }
 
+  static async getEarScreenings(req, res) {
+    try {
+      const { patient_id, phase_id, page = 1, limit = 10 } = req.query
+      const offset = (page - 1) * limit
+
+      let query = `
+        SELECT es.*, p.first_name, p.last_name, p.shf_id, u.username as completed_by, ph.phase_name
+        FROM ear_screening es
+        LEFT JOIN patients p ON es.patient_id = p.patient_id
+        LEFT JOIN users u ON es.completed_by_user_id = u.user_id
+        LEFT JOIN phases ph ON es.phase_id = ph.phase_id
+      `
+
+      const conditions = []
+      const params = []
+
+      if (patient_id) {
+        conditions.push(`es.patient_id = $${params.length + 1}`)
+        params.push(patient_id)
+      }
+
+      if (phase_id) {
+        conditions.push(`es.phase_id = $${params.length + 1}`)
+        params.push(phase_id)
+      }
+
+      if (conditions.length > 0) {
+        query += ` WHERE ${conditions.join(" AND ")}`
+      }
+
+      query += ` ORDER BY es.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`
+      params.push(limit, offset)
+
+      const result = await db.query(query, params)
+
+      return ResponseHandler.success(res, result.rows, "Ear screenings retrieved successfully")
+    } catch (error) {
+      console.error("Get ear screenings error:", error)
+      return ResponseHandler.error(res, "Failed to retrieve ear screenings")
+    }
+  }
+
+  static async getHearingScreenings(req, res) {
+    try {
+      const { patient_id, phase_id, page = 1, limit = 10 } = req.query
+      const offset = (page - 1) * limit
+
+      let query = `
+        SELECT hs.*, p.first_name, p.last_name, p.shf_id, u.username as completed_by, ph.phase_name
+        FROM hearing_screening hs
+        LEFT JOIN patients p ON hs.patient_id = p.patient_id
+        LEFT JOIN users u ON hs.completed_by_user_id = u.user_id
+        LEFT JOIN phases ph ON hs.phase_id = ph.phase_id
+      `
+
+      const conditions = []
+      const params = []
+
+      if (patient_id) {
+        conditions.push(`hs.patient_id = $${params.length + 1}`)
+        params.push(patient_id)
+      }
+
+      if (phase_id) {
+        conditions.push(`hs.phase_id = $${params.length + 1}`)
+        params.push(phase_id)
+      }
+
+      if (conditions.length > 0) {
+        query += ` WHERE ${conditions.join(" AND ")}`
+      }
+
+      query += ` ORDER BY hs.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`
+      params.push(limit, offset)
+
+      const result = await db.query(query, params)
+
+      return ResponseHandler.success(res, result.rows, "Hearing screenings retrieved successfully")
+    } catch (error) {
+      console.error("Get hearing screenings error:", error)
+      return ResponseHandler.error(res, "Failed to retrieve hearing screenings")
+    }
+  }
+
   static async getFittingTables(req, res) {
     try {
       const { patient_id, page = 1, limit = 10 } = req.query
@@ -374,6 +467,42 @@ class Phase2Controller {
     } catch (error) {
       console.error("Get fitting tables error:", error)
       return ResponseHandler.error(res, "Failed to retrieve fitting tables")
+    }
+  }
+
+  static async getFittings(req, res) {
+    try {
+      const { patient_id, page = 1, limit = 10 } = req.query
+      const offset = (page - 1) * limit
+
+      let query = `
+        SELECT f.*, p.first_name, p.last_name, p.shf_id, u.username as fitter_name
+        FROM fitting f
+        LEFT JOIN patients p ON f.patient_id = p.patient_id
+        LEFT JOIN users u ON f.fitter_id = u.user_id
+      `
+
+      const conditions = []
+      const params = []
+
+      if (patient_id) {
+        conditions.push(`f.patient_id = $${params.length + 1}`)
+        params.push(patient_id)
+      }
+
+      if (conditions.length > 0) {
+        query += ` WHERE ${conditions.join(" AND ")}`
+      }
+
+      query += ` ORDER BY f.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`
+      params.push(limit, offset)
+
+      const result = await db.query(query, params)
+
+      return ResponseHandler.success(res, result.rows, "Fittings retrieved successfully")
+    } catch (error) {
+      console.error("Get fittings error:", error)
+      return ResponseHandler.error(res, "Failed to retrieve fittings")
     }
   }
 
@@ -513,6 +642,142 @@ class Phase2Controller {
       await client.query("ROLLBACK")
       console.error("Update Phase 2 registration error:", error)
       return ResponseHandler.error(res, "Failed to update Phase 2 registration")
+    } finally {
+      client.release()
+    }
+  }
+
+  static async updateEarScreening(req, res) {
+    const client = await db.getClient()
+
+    try {
+      await client.query("BEGIN")
+
+      const { screeningId } = req.params
+      const screeningData = req.body
+
+      // Get current data for audit log
+      const currentScreeningResult = await client.query(
+        "SELECT * FROM ear_screening WHERE ear_screening_id = $1",
+        [screeningId]
+      )
+
+      if (currentScreeningResult.rows.length === 0) {
+        await client.query("ROLLBACK")
+        return ResponseHandler.notFound(res, "Ear screening not found")
+      }
+
+      const currentScreening = currentScreeningResult.rows[0]
+
+      // Build update query dynamically
+      const columns = Object.keys(screeningData)
+      if (columns.length === 0) {
+        await client.query("ROLLBACK")
+        return ResponseHandler.error(res, "No data provided for update", 400)
+      }
+
+      const setClause = columns.map((col, index) => `${col} = $${index + 1}`).join(", ")
+      const values = Object.values(screeningData)
+      values.push(screeningId) // Add screeningId for WHERE clause
+
+      const query = `
+        UPDATE ear_screening 
+        SET ${setClause}, updated_at = CURRENT_TIMESTAMP
+        WHERE ear_screening_id = $${values.length}
+        RETURNING *
+      `
+
+      const result = await client.query(query, values)
+      const updatedScreening = result.rows[0]
+
+      // Log update
+      await client.query(
+        "INSERT INTO audit_logs (table_name, record_id, action_type, old_data, new_data, changed_by_user_id) VALUES ($1, $2, $3, $4, $5, $6)",
+        [
+          "ear_screening",
+          screeningId,
+          "UPDATE",
+          JSON.stringify(currentScreening),
+          JSON.stringify(updatedScreening),
+          req.user.user_id,
+        ],
+      )
+
+      await client.query("COMMIT")
+
+      return ResponseHandler.success(res, updatedScreening, "Ear screening updated successfully")
+    } catch (error) {
+      await client.query("ROLLBACK")
+      console.error("Update ear screening error:", error)
+      return ResponseHandler.error(res, "Failed to update ear screening")
+    } finally {
+      client.release()
+    }
+  }
+
+  static async updateHearingScreening(req, res) {
+    const client = await db.getClient()
+
+    try {
+      await client.query("BEGIN")
+
+      const { screeningId } = req.params
+      const screeningData = req.body
+
+      // Get current data for audit log
+      const currentScreeningResult = await client.query(
+        "SELECT * FROM hearing_screening WHERE hearing_screen_id = $1",
+        [screeningId]
+      )
+
+      if (currentScreeningResult.rows.length === 0) {
+        await client.query("ROLLBACK")
+        return ResponseHandler.notFound(res, "Hearing screening not found")
+      }
+
+      const currentScreening = currentScreeningResult.rows[0]
+
+      // Build update query dynamically
+      const columns = Object.keys(screeningData)
+      if (columns.length === 0) {
+        await client.query("ROLLBACK")
+        return ResponseHandler.error(res, "No data provided for update", 400)
+      }
+
+      const setClause = columns.map((col, index) => `${col} = $${index + 1}`).join(", ")
+      const values = Object.values(screeningData)
+      values.push(screeningId) // Add screeningId for WHERE clause
+
+      const query = `
+        UPDATE hearing_screening 
+        SET ${setClause}, updated_at = CURRENT_TIMESTAMP
+        WHERE hearing_screen_id = $${values.length}
+        RETURNING *
+      `
+
+      const result = await client.query(query, values)
+      const updatedScreening = result.rows[0]
+
+      // Log update
+      await client.query(
+        "INSERT INTO audit_logs (table_name, record_id, action_type, old_data, new_data, changed_by_user_id) VALUES ($1, $2, $3, $4, $5, $6)",
+        [
+          "hearing_screening",
+          screeningId,
+          "UPDATE",
+          JSON.stringify(currentScreening),
+          JSON.stringify(updatedScreening),
+          req.user.user_id,
+        ],
+      )
+
+      await client.query("COMMIT")
+
+      return ResponseHandler.success(res, updatedScreening, "Hearing screening updated successfully")
+    } catch (error) {
+      await client.query("ROLLBACK")
+      console.error("Update hearing screening error:", error)
+      return ResponseHandler.error(res, "Failed to update hearing screening")
     } finally {
       client.release()
     }
@@ -787,6 +1052,57 @@ class Phase2Controller {
       return ResponseHandler.error(res, "Failed to update final QC")
     } finally {
       client.release()
+    }
+  }
+
+
+    // Get complete Phase 2 data for a patient
+  static async getPhase2Data(req, res) {
+    try {
+      const { patientId } = req.params
+
+      const queries = {
+        registration: `
+          SELECT * FROM phase2_registration_section 
+          WHERE patient_id = $1 ORDER BY created_at DESC LIMIT 1
+        `,
+        earScreening: `
+          SELECT * FROM ear_screening 
+          WHERE patient_id = $1 AND phase_id = 2 ORDER BY created_at DESC
+        `,
+        hearingScreening: `
+          SELECT * FROM hearing_screening 
+          WHERE patient_id = $1 AND phase_id = 2 ORDER BY created_at DESC LIMIT 1
+        `,
+        fittingTable: `
+          SELECT * FROM fitting_table 
+          WHERE patient_id = $1 ORDER BY created_at DESC LIMIT 1
+        `,
+        fitting: `
+          SELECT * FROM fitting 
+          WHERE patient_id = $1 ORDER BY created_at DESC LIMIT 1
+        `,
+        counseling: `
+          SELECT * FROM counseling 
+          WHERE patient_id = $1 ORDER BY created_at DESC LIMIT 1
+        `,
+        finalQC: `
+          SELECT * FROM final_qc_p2 
+          WHERE patient_id = $1 ORDER BY created_at DESC LIMIT 1
+        `,
+      }
+
+      const results = {}
+
+      for (const [key, query] of Object.entries(queries)) {
+        const result = await db.query(query, [patientId])
+        results[key] = key === "earScreening" ? result.rows : result.rows[0] || null
+      }
+
+      return ResponseHandler.success(res, results, "Phase 2 data retrieved successfully")
+    } catch (error) {
+      console.error("Get Phase 2 data error:", error)
+      return ResponseHandler.error(res, "Failed to retrieve Phase 2 data")
     }
   }
 }

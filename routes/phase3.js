@@ -23,6 +23,20 @@ router.get(
   Phase3Controller.getRegistrations,
 )
 
+// Ear Screening
+router.post(
+  "/ear-screening",
+  requireRole(["admin", "city_coordinator", "country_coordinator", "phase1_specialist", "audiologist"]),
+  validateRequest(schemas.earScreening),
+  Phase3Controller.createEarScreening,
+)
+
+router.get(
+  "/ear-screening",
+  requireRole(["admin", "city_coordinator", "country_coordinator", "phase1_specialist", "audiologist"]),
+  Phase3Controller.getEarScreenings,
+)
+
 // Aftercare Assessment
 router.post(
   "/aftercare-assessment",
@@ -63,6 +77,12 @@ router.put(
   "/registration/:registrationId",
   requireRole(["admin", "city_coordinator", "country_coordinator", "phase3_specialist"]),
   Phase3Controller.updateRegistration,
+)
+
+router.put(
+  "/ear-screening/:screeningId",
+  requireRole(["admin", "city_coordinator", "country_coordinator", "phase1_specialist", "audiologist"]),
+  Phase3Controller.updateEarScreening,
 )
 
 router.put(

@@ -231,7 +231,7 @@ CREATE TABLE phase2_registration_section (
 CREATE TABLE fitting_table (
     fitting_table_id SERIAL PRIMARY KEY,
     patient_id INTEGER NOT NULL REFERENCES patients(patient_id),
-    phase_id INTEGER DEFAULT 2 REFERENCES phases(phase_id),
+    phase_id INTEGER NOT NULL REFERENCES phases(phase_id),
     fitter_id INTEGER REFERENCES users(user_id),
     fitting_left_power_level VARCHAR(100),
     fitting_left_volume VARCHAR(100),
@@ -251,7 +251,7 @@ CREATE TABLE fitting_table (
 CREATE TABLE fitting (
     fitting_id SERIAL PRIMARY KEY,
     patient_id INTEGER NOT NULL REFERENCES patients(patient_id),
-    phase_id INTEGER DEFAULT 2 REFERENCES phases(phase_id),
+    phase_id INTEGER NOT NULL REFERENCES phases(phase_id),
     fitter_id INTEGER REFERENCES users(user_id),
     number_of_hearing_aid INTEGER,
     special_device VARCHAR(100),

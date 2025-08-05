@@ -23,6 +23,52 @@ router.get(
   Phase2Controller.getRegistrations,
 )
 
+router.put(
+  "/registration/:registrationId",
+  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist"]),
+  Phase2Controller.updateRegistration,
+)
+
+// Ear Screening--
+router.post(
+  "/ear-screening",
+  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist", "audiologist"]),
+  validateRequest(schemas.earScreening),
+  Phase2Controller.createEarScreening,
+)
+
+router.get(
+  "/ear-screening",
+  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist", "audiologist"]),
+  Phase2Controller.getEarScreenings,
+)
+
+router.put(
+  "/ear-screening/:screeningId",
+  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist", "audiologist"]),
+  Phase2Controller.updateEarScreening,
+)
+
+// Hearing Screening
+router.post(
+  "/hearing-screening",
+  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist", "audiologist"]),
+  validateRequest(schemas.hearingScreening),
+  Phase2Controller.createHearingScreening,
+)
+
+router.get(
+  "/hearing-screening",
+  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist", "audiologist"]),
+  Phase2Controller.getHearingScreenings,
+)
+
+router.put(
+  "/hearing-screening/:screeningId",
+  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist", "audiologist"]),
+  Phase2Controller.updateHearingScreening,
+)
+
 // Fitting Table
 router.post(
   "/fitting-table",
@@ -31,10 +77,17 @@ router.post(
   Phase2Controller.createFittingTable,
 )
 
+
 router.get(
   "/fitting-table",
   requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist", "audiologist"]),
   Phase2Controller.getFittingTables,
+)
+
+router.put(
+  "/fitting-table/:fittingTableId",
+  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist", "audiologist"]),
+  Phase2Controller.updateFittingTable,
 )
 
 // Fitting
@@ -51,6 +104,12 @@ router.get(
   Phase2Controller.getFittings,
 )
 
+router.put(
+  "/fitting/:fittingId",
+  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist", "audiologist"]),
+  Phase2Controller.updateFitting,
+)
+
 // Counseling
 router.post(
   "/counseling",
@@ -63,6 +122,12 @@ router.get(
   "/counseling",
   requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist", "counselor"]),
   Phase2Controller.getCounselings,
+)
+
+router.put(
+  "/counseling/:counselingId",
+  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist", "counselor"]),
+  Phase2Controller.updateCounseling,
 )
 
 // Final QC Phase 2
@@ -79,42 +144,17 @@ router.get(
   Phase2Controller.getFinalQCs,
 )
 
+router.put(
+  "/final-qc/:qcId",
+  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist"]),
+  Phase2Controller.updateFinalQC,
+)
+
 // Get complete Phase 2 data for a patient
 router.get(
   "/patient/:patientId",
   requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist", "audiologist", "counselor"]),
   Phase2Controller.getPhase2Data,
-)
-
-// Update Phase 2 records
-router.put(
-  "/registration/:registrationId",
-  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist"]),
-  Phase2Controller.updateRegistration,
-)
-
-router.put(
-  "/fitting-table/:fittingTableId",
-  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist", "audiologist"]),
-  Phase2Controller.updateFittingTable,
-)
-
-router.put(
-  "/fitting/:fittingId",
-  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist", "audiologist"]),
-  Phase2Controller.updateFitting,
-)
-
-router.put(
-  "/counseling/:counselingId",
-  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist", "counselor"]),
-  Phase2Controller.updateCounseling,
-)
-
-router.put(
-  "/final-qc/:qcId",
-  requireRole(["admin", "city_coordinator", "country_coordinator", "phase2_specialist"]),
-  Phase2Controller.updateFinalQC,
 )
 
 module.exports = router
