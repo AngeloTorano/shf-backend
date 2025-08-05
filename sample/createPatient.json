@@ -1,0 +1,24 @@
+{
+    "METHOD": "POST",
+    "URL": "/api/v1/endpoint",
+    "HEADER": 
+    "BODY": {
+  "last_name": "Doe",
+  "first_name": "John",
+  "gender": "Male",
+  "date_of_birth": "1985-05-15",
+  "mobile_number": "+1234567890",
+  "mobile_sms": true,
+  "alternative_number": "+9876543210",
+  "alternative_sms": false,
+  "region_district": "North District",
+  "city_village": "Springfield",
+  "highest_education_level": "Bachelor's Degree",
+  "employment_status": "Employed",
+  "school_name": "Springfield High",
+  "school_phone_number": "+1122334455"
+}
+
+}
+
+
